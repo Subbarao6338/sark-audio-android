@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - stable
     tags:
       - 'v*'
   workflow_dispatch:
@@ -21,43 +22,85 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Set up JDK 27
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
+          java-version: '27'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
 
       - name: Generate build keystore
         run: |
           mkdir -p ~/.android
-          keytool -genkey -v -keystore ~/.android/debug.keystore -alias androiddebugkey \
-            -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          keytool -genkeypair -v \
+            -keystore ~/.android/release.keystore \
+            -alias androidreleasekey \
+            -storepass android \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Sark Audio,O=Sark,C=US"
 
       - name: Grant execute permissions for gradlew
         run: chmod +x gradlew
 
-      - name: Determine Version and Release Info
-        id: version_info
+      - name: Determine Dynamic Version and Release Notes
+        id: release_meta
         run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          VERSION_NAME="0.${COMMIT_COUNT}"
+          BUILD_DATE=$(date -u +"%Y.%m.%d")
           TAG_NAME="${{ github.ref_name }}"
           if [ -z "$TAG_NAME" ] || [ "${{ github.ref_type }}" != "tag" ]; then
-            TAG_NAME="v${VERSION_NAME}"
+            TAG_NAME="v${BUILD_DATE}"
           fi
-          echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
-          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+          # Find previous tag (if any) before current HEAD
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG_NAME}^" 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG_NAME" ]; then
+            COMMITS_SUMMARY=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" 2>/dev/null || echo "")
+            RELEASE_TITLE="Release ${BUILD_DATE} (since ${PREV_TAG})"
+          else
+            COMMITS_SUMMARY=""
+            RELEASE_TITLE="Release ${BUILD_DATE}"
+          fi
+
+          if [ -z "$COMMITS_SUMMARY" ]; then
+            COMMITS_SUMMARY=$(git log -n 5 --pretty=format:"- %s (%h)" 2>/dev/null || echo "- Automated release build (${BUILD_DATE})")
+          fi
+
+          echo "version_name=${BUILD_DATE}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "release_title=${RELEASE_TITLE}" >> "$GITHUB_OUTPUT"
+
+          # Write dynamic release notes to temporary markdown file for gh release
+          {
+            echo "### Sark Audio Release"
+            echo ""
+            echo "#### What's Changed"
+            echo "$COMMITS_SUMMARY"
+            echo ""
+            echo "#### Build Specifications"
+            echo "- **Architecture**: \`arm64-v8a\` strictly filtered native libraries."
+            echo "- **Minification**: Aggressive R8/ProGuard dead code removal and resource shrinking enabled."
+            echo "- **Design System**: Material 3 Expressive theme with dynamic color tokens."
+            echo ""
+            echo "#### Downloads"
+            echo "- \`sark-audio-v${BUILD_DATE}-arm64.apk\`"
+          } > release_body.md
+
+      - name: Build Single arm64-v8a Release APK
+        run: ./gradlew assembleRelease -x lint -x testDebugUnitTest --no-daemon
 
       - name: Prepare Release Artifacts
         id: prepare_apk
         run: |
           APK_DIR="app/build/outputs/apk/release"
-          VERSION="${{ steps.version_info.outputs.version_name }}"
+          VERSION="${{ steps.release_meta.outputs.version_name }}"
           OUTPUT_APK="sark-audio-v${VERSION}-arm64.apk"
           cp "${APK_DIR}/app-release.apk" "${OUTPUT_APK}"
           echo "apk_path=${OUTPUT_APK}" >> "$GITHUB_OUTPUT"
@@ -72,18 +115,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version_info.outputs.tag_name }}
-          name: "SARK Audio Release v${{ steps.version_info.outputs.version_name }}"
-          body: |
-            ### SARK Audio Editor Release v${{ steps.version_info.outputs.version_name }}
-
-            #### Highlights & Changes
-            - Version: **${{ steps.version_info.outputs.version_name }}**
-            - Target Architecture: **arm64-v8a** (optimized & reduced APK size)
-            - ProGuard / R8 code and resource shrinking enabled.
-
-            #### Downloads
-            - **`sark-audio-v${{ steps.version_info.outputs.version_name }}-arm64.apk`**: Stable release APK for arm64 devices.
+          tag_name: ${{ steps.release_meta.outputs.tag_name }}
+          name: ${{ steps.release_meta.outputs.release_title }}
+          body_path: release_body.md
           draft: false
           prerelease: false
           files: ${{ steps.prepare_apk.outputs.apk_path }}

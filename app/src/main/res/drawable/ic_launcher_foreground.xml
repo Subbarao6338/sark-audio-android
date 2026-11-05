@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Center circular glow container -->
+    <path
+        android:pathData="M 54,54 m -26,0 a 26,26 0 1,0 52,0 a 26,26 0 1,0 -52,0"
+        android:fillAlpha="0.22">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="28"
+                android:startY="28"
+                android:endX="80"
+                android:endY="80"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF6366F1" />
+                <item android:offset="1.0" android:color="#FFF43F5E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Vibrant Expressive Audio Waveform Pillars with Rounded Caps -->
+    <!-- Bar 1 (Leftmost small bar) -->
+    <path
+        android:pathData="M 32,46 L 32,62"
+        android:strokeWidth="4"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="32"
+                android:startY="46"
+                android:endX="32"
+                android:endY="62"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF818CF8" />
+                <item android:offset="1.0" android:color="#FF6366F1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Bar 2 (Medium bar) -->
+    <path
+        android:pathData="M 40,38 L 40,70"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="40"
+                android:startY="38"
+                android:endX="40"
+                android:endY="70"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF14B8A6" />
+                <item android:offset="1.0" android:color="#FF06B6D4" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Bar 3 (Center tall bar - Primary Accent) -->
+    <path
+        android:pathData="M 49,28 L 49,80"
+        android:strokeWidth="5"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="49"
+                android:startY="28"
+                android:endX="49"
+                android:endY="80"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFF43F5E" />
+                <item android:offset="0.5" android:color="#FFF59E0B" />
+                <item android:offset="1.0" android:color="#FF6366F1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Bar 4 (Right-center tall bar) -->
+    <path
+        android:pathData="M 58,34 L 58,74"
+        android:strokeWidth="5"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="58"
+                android:startY="34"
+                android:endX="58"
+                android:endY="74"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFF59E0B" />
+                <item android:offset="1.0" android:color="#FF10B981" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Bar 5 (Medium bar) -->
+    <path
+        android:pathData="M 67,40 L 67,68"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="67"
+                android:startY="40"
+                android:endX="67"
+                android:endY="68"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF6366F1" />
+                <item android:offset="1.0" android:color="#FF818CF8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Bar 6 (Rightmost small bar) -->
+    <path
+        android:pathData="M 76,48 L 76,60"
+        android:strokeWidth="4"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="76"
+                android:startY="48"
+                android:endX="76"
+                android:endY="60"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFF43F5E" />
+                <item android:offset="1.0" android:color="#FFFB7185" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

@@ -1,16 +1,29 @@
-# Sark Audio Proguard Rules
+# Sark Audio Aggressive Proguard / R8 Optimization Rules
 
-# Keep Jetpack Compose runtime and UI essentials
--keep class androidx.compose.** { *; }
+# Enable aggressive code optimizations
+-optimizationpasses 5
+-allowaccessmodification
+-repackageclasses ''
 
-# Keep App components
--keep class sark.audio.** { *; }
+# Activity and entry points
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
 
-# Keep data models / serializable classes if needed
+# Jetpack Compose runtime essentials
 -keepclassmembers class * {
     @androidx.compose.runtime.Composable *;
     @androidx.compose.runtime.ReadOnlyComposable *;
 }
 
-# Standard Android optimizations
+# Preserve metadata / models needed for reflection if any
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+
+# Strip debug info / logging where appropriate
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}
+
+# Standard suppressions
 -dontwarn **

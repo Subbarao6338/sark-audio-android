@@ -1,28 +1,45 @@
-import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-fun getGitCommitCount(): Int {
-    return try {
-        val stdout = ByteArrayOutputStream()
-        exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-            standardOutput = stdout
-            isIgnoreExitValue = true
-        }
-        val count = stdout.toString().trim().toIntOrNull()
-        if (count != null && count > 0) count else 1
-    } catch (_: Exception) {
-        1
+val buildDate = Date()
+// Version Name Format: Dynamic date-based versioning formatted as YYYY.MM.DD (e.g., 2026.11.05)
+val appVersionName: String = SimpleDateFormat("yyyy.MM.dd", Locale.US).format(buildDate)
+// Version Code: Standardized integer calculated from date components (e.g., YYYYMMDDHH)
+val appVersionCode: Int = SimpleDateFormat("yyyyMMddHH", Locale.US).format(buildDate).toInt()
+
+fun ensureKeystoreExists(targetKeystore: File, storePass: String, keyPass: String, alias: String) {
+    if (!targetKeystore.exists()) {
+        targetKeystore.parentFile?.mkdirs()
+        val process = ProcessBuilder(
+            "keytool", "-genkeypair", "-v",
+            "-keystore", targetKeystore.absolutePath,
+            "-alias", alias,
+            "-storepass", storePass,
+            "-keypass", keyPass,
+            "-keyalg", "RSA",
+            "-keysize", "2048",
+            "-validity", "10000",
+            "-dname", "CN=Sark Audio,O=Sark,C=US"
+        ).inheritIO().start()
+        process.waitFor()
     }
 }
 
-val commitCount = getGitCommitCount()
-val appVersionCode = commitCount
-val appVersionName = "0.$commitCount"
+val keystorePath = project.findProperty("RELEASE_STORE_FILE")?.toString()
+    ?: "${System.getProperty("user.home")}/.android/release.keystore"
+val defaultStorePass = project.findProperty("RELEASE_STORE_PASSWORD")?.toString() ?: "android"
+val defaultKeyAlias = project.findProperty("RELEASE_KEY_ALIAS")?.toString() ?: "androidreleasekey"
+val defaultKeyPass = project.findProperty("RELEASE_KEY_PASSWORD")?.toString() ?: "android"
+
+val keystoreFile = file(keystorePath)
+ensureKeystoreExists(keystoreFile, defaultStorePass, defaultKeyPass, defaultKeyAlias)
 
 android {
     namespace = "sark.audio"
@@ -41,23 +58,28 @@ android {
         }
 
         ndk {
+            abiFilters.clear()
             abiFilters.add("arm64-v8a")
         }
     }
 
+    androidResources {
+        localeFilters += listOf("en")
+    }
+
     signingConfigs {
-        create("release") {
-            val keystoreFile = file(project.findProperty("RELEASE_STORE_FILE")?.toString() ?: "${System.getProperty("user.home")}/.android/debug.keystore")
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = project.findProperty("RELEASE_STORE_PASSWORD")?.toString() ?: "android"
-                keyAlias = project.findProperty("RELEASE_KEY_ALIAS")?.toString() ?: "androiddebugkey"
-                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD")?.toString() ?: "android"
-            }
+        create("sharedSigning") {
+            storeFile = keystoreFile
+            storePassword = defaultStorePass
+            keyAlias = defaultKeyAlias
+            keyPassword = defaultKeyPass
         }
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("sharedSigning")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -65,30 +87,31 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("sharedSigning")
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     buildFeatures {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
-
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += listOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/*.version",
+                "/META-INF/*.kotlin_module",
+                "DebugProbesKt.bin",
+                "kotlin-tooling-metadata.json"
+            )
+        }
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }
