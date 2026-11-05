@@ -1,7 +1,28 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+fun getGitCommitCount(): Int {
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+            standardOutput = stdout
+            isIgnoreExitValue = true
+        }
+        val count = stdout.toString().trim().toIntOrNull()
+        if (count != null && count > 0) count else 1
+    } catch (_: Exception) {
+        1
+    }
+}
+
+val commitCount = getGitCommitCount()
+val appVersionCode = commitCount
+val appVersionName = "0.$commitCount"
 
 android {
     namespace = "sark.audio"
@@ -11,22 +32,40 @@ android {
         applicationId = "sark.audio"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystoreFile = file(project.findProperty("RELEASE_STORE_FILE")?.toString() ?: "${System.getProperty("user.home")}/.android/debug.keystore")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = project.findProperty("RELEASE_STORE_PASSWORD")?.toString() ?: "android"
+                keyAlias = project.findProperty("RELEASE_KEY_ALIAS")?.toString() ?: "androiddebugkey"
+                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD")?.toString() ?: "android"
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
