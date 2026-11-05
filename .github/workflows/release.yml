@@ -1,0 +1,91 @@
+name: Release APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Generate build keystore
+        run: |
+          mkdir -p ~/.android
+          keytool -genkey -v -keystore ~/.android/debug.keystore -alias androiddebugkey \
+            -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Grant execute permissions for gradlew
+        run: chmod +x gradlew
+
+      - name: Determine Version and Release Info
+        id: version_info
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          VERSION_NAME="0.${COMMIT_COUNT}"
+          TAG_NAME="${{ github.ref_name }}"
+          if [ -z "$TAG_NAME" ] || [ "${{ github.ref_type }}" != "tag" ]; then
+            TAG_NAME="v${VERSION_NAME}"
+          fi
+          echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Prepare Release Artifacts
+        id: prepare_apk
+        run: |
+          APK_DIR="app/build/outputs/apk/release"
+          VERSION="${{ steps.version_info.outputs.version_name }}"
+          OUTPUT_APK="sark-audio-v${VERSION}-arm64.apk"
+          cp "${APK_DIR}/app-release.apk" "${OUTPUT_APK}"
+          echo "apk_path=${OUTPUT_APK}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sark-audio-arm64-release
+          path: ${{ steps.prepare_apk.outputs.apk_path }}
+          retention-days: 1
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version_info.outputs.tag_name }}
+          name: "SARK Audio Release v${{ steps.version_info.outputs.version_name }}"
+          body: |
+            ### SARK Audio Editor Release v${{ steps.version_info.outputs.version_name }}
+
+            #### Highlights & Changes
+            - Version: **${{ steps.version_info.outputs.version_name }}**
+            - Target Architecture: **arm64-v8a** (optimized & reduced APK size)
+            - ProGuard / R8 code and resource shrinking enabled.
+
+            #### Downloads
+            - **`sark-audio-v${{ steps.version_info.outputs.version_name }}-arm64.apk`**: Stable release APK for arm64 devices.
+          draft: false
+          prerelease: false
+          files: ${{ steps.prepare_apk.outputs.apk_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
