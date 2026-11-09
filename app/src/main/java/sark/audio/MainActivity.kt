@@ -40,20 +40,47 @@ class MainActivity : ComponentActivity() {
                         "dashboard" -> AudioDashboardScreen(
                             onNavigateToTool = { toolId -> currentScreen = toolId }
                         )
+                        "creator", "dtmf_creator", "silence_creator" -> AudioCreatorScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
                         "recorder" -> AudioRecorderScreen(
                             onBack = { currentScreen = "dashboard" }
                         )
-                        "trimmer" -> AudioTrimmerScreen(
+                        "editor", "trimmer", "fade_editor", "silence_strip" -> AudioTrimmerScreen(
                             onBack = { currentScreen = "dashboard" }
                         )
                         "merger" -> AudioMergerScreen(
                             onBack = { currentScreen = "dashboard" }
                         )
-                        "effects" -> AudioEffectsScreen(
+                        "mixer" -> AudioMixerScreen(
                             onBack = { currentScreen = "dashboard" }
                         )
-                        "inspector" -> AudioInspectorScreen(
+                        "vocal_remover", "autotune", "voice_changer", "stems_splitter", "voice_clone" -> AudioVocalSuiteScreen(
                             onBack = { currentScreen = "dashboard" }
+                        )
+                        "mastering", "equalizer", "eight_d", "chorus", "denoise" -> AudioMasteringAndEffectsScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "effects", "compressor", "delay", "distortion", "bitcrusher", "channel_processor", "loop_creator", "sfx_manager" -> AudioEffectsScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "track_splitter", "bulk_converter", "video_to_audio" -> AudioConverterAndSplitterScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "tuner", "analyzer" -> AudioAnalyzerScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "inspector", "bitdepth" -> AudioInspectorScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "tag_editor" -> AudioTagEditorScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        "manager" -> AudioFileManagerScreen(
+                            onBack = { currentScreen = "dashboard" }
+                        )
+                        else -> AudioDashboardScreen(
+                            onNavigateToTool = { toolId -> currentScreen = toolId }
                         )
                     }
                 }
