@@ -41,7 +41,18 @@ fun AudioMixerScreen(
     var track1Volume by remember { mutableStateOf(0.8f) }
     var track2Volume by remember { mutableStateOf(0.8f) }
     var track3Volume by remember { mutableStateOf(0.7f) }
+    var track1Pan by remember { mutableStateOf(0.0f) }
+    var track2Pan by remember { mutableStateOf(-0.4f) }
+    var track3Pan by remember { mutableStateOf(0.4f) }
+    var track1Mute by remember { mutableStateOf(false) }
+    var track2Mute by remember { mutableStateOf(false) }
+    var track3Mute by remember { mutableStateOf(false) }
+    var track1Solo by remember { mutableStateOf(false) }
+    var track2Solo by remember { mutableStateOf(false) }
+    var track3Solo by remember { mutableStateOf(false) }
     var track2DelayMs by remember { mutableStateOf(200f) }
+
+    var masterVolume by remember { mutableStateOf(1.0f) }
 
     var track1Name by remember { mutableStateOf("Track 1 (Lead)") }
     var track2Name by remember { mutableStateOf("Track 2 (Harmony)") }
@@ -189,52 +200,79 @@ fun AudioMixerScreen(
                     Text("MULTI-TRACK FADERS & OFFSETS", style = MaterialTheme.typography.labelSmall, color = AccentAmber, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Track 1
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("$track1Name: ${(track1Volume * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { track1Launcher.launch("audio/*") }) {
-                            Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Row {
+                            FilterChip(selected = track1Mute, onClick = { track1Mute = !track1Mute }, label = { Text("Mute", fontSize = 10.sp) })
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Pick File", fontSize = 11.sp)
+                            FilterChip(selected = track1Solo, onClick = { track1Solo = !track1Solo }, label = { Text("Solo", fontSize = 10.sp) })
+                            Spacer(modifier = Modifier.width(4.dp))
+                            TextButton(onClick = { track1Launcher.launch("audio/*") }) {
+                                Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Pick", fontSize = 11.sp)
+                            }
                         }
                     }
                     Slider(value = track1Volume, onValueChange = { track1Volume = it }, valueRange = 0f..1.5f)
+                    Text("Pan: ${"%.1f".format(track1Pan)}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Slider(value = track1Pan, onValueChange = { track1Pan = it }, valueRange = -1.0f..1.0f)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Track 2
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("$track2Name: ${(track2Volume * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { track2Launcher.launch("audio/*") }) {
-                            Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Row {
+                            FilterChip(selected = track2Mute, onClick = { track2Mute = !track2Mute }, label = { Text("Mute", fontSize = 10.sp) })
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Pick File", fontSize = 11.sp)
+                            FilterChip(selected = track2Solo, onClick = { track2Solo = !track2Solo }, label = { Text("Solo", fontSize = 10.sp) })
+                            Spacer(modifier = Modifier.width(4.dp))
+                            TextButton(onClick = { track2Launcher.launch("audio/*") }) {
+                                Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Pick", fontSize = 11.sp)
+                            }
                         }
                     }
                     Slider(value = track2Volume, onValueChange = { track2Volume = it }, valueRange = 0f..1.5f)
+                    Text("Pan: ${"%.1f".format(track2Pan)} | Delay: ${track2DelayMs.toInt()}ms", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Slider(value = track2Pan, onValueChange = { track2Pan = it }, valueRange = -1.0f..1.0f)
                     Slider(value = track2DelayMs, onValueChange = { track2DelayMs = it }, valueRange = 0f..1000f)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Track 3
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("$track3Name: ${(track3Volume * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { track3Launcher.launch("audio/*") }) {
-                            Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Row {
+                            FilterChip(selected = track3Mute, onClick = { track3Mute = !track3Mute }, label = { Text("Mute", fontSize = 10.sp) })
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Pick File", fontSize = 11.sp)
+                            FilterChip(selected = track3Solo, onClick = { track3Solo = !track3Solo }, label = { Text("Solo", fontSize = 10.sp) })
+                            Spacer(modifier = Modifier.width(4.dp))
+                            TextButton(onClick = { track3Launcher.launch("audio/*") }) {
+                                Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Pick", fontSize = 11.sp)
+                            }
                         }
                     }
                     Slider(value = track3Volume, onValueChange = { track3Volume = it }, valueRange = 0f..1.5f)
+                    Text("Pan: ${"%.1f".format(track3Pan)}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Slider(value = track3Pan, onValueChange = { track3Pan = it }, valueRange = -1.0f..1.0f)
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -246,10 +284,11 @@ fun AudioMixerScreen(
                             onClick = {
                                 mixedAudio = AudioMixer.mixTracks(
                                     listOf(
-                                        AudioMixer.MixTrack(track1Audio, track1Volume, 0L),
-                                        AudioMixer.MixTrack(track2Audio, track2Volume, track2DelayMs.toLong()),
-                                        AudioMixer.MixTrack(track3Audio, track3Volume, 0L)
-                                    )
+                                        AudioMixer.MixTrack(track1Audio, track1Volume, 0L, pan = track1Pan, isMuted = track1Mute, isSolo = track1Solo),
+                                        AudioMixer.MixTrack(track2Audio, track2Volume, track2DelayMs.toLong(), pan = track2Pan, isMuted = track2Mute, isSolo = track2Solo),
+                                        AudioMixer.MixTrack(track3Audio, track3Volume, 0L, pan = track3Pan, isMuted = track3Mute, isSolo = track3Solo)
+                                    ),
+                                    masterVolume = masterVolume
                                 )
                                 statusMessage = "Summed 3 tracks in parallel with soft saturation limiting."
                             },

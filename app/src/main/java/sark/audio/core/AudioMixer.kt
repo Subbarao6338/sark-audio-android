@@ -13,7 +13,10 @@ object AudioMixer {
     data class MixTrack(
         val audioData: AudioData,
         val volume: Float = 1.0f,
-        val delayOffsetMs: Long = 0L
+        val delayOffsetMs: Long = 0L,
+        val pan: Float = 0.0f, // -1.0f (Left) to +1.0f (Right)
+        val isMuted: Boolean = false,
+        val isSolo: Boolean = false
     )
 
     /**
@@ -22,7 +25,8 @@ object AudioMixer {
     fun mixTracks(
         tracks: List<MixTrack>,
         targetSampleRate: Int = 44100,
-        targetChannels: Int = 2
+        targetChannels: Int = 2,
+        masterVolume: Float = 1.0f
     ): AudioData {
         if (tracks.isEmpty()) {
             return AudioSilenceGenerator.generateSilence(500L, targetSampleRate, targetChannels)
@@ -57,18 +61,26 @@ object AudioMixer {
 
         // Floating point summing buffer
         val sumBuffer = FloatArray(maxTotalFrames * targetChannels)
+        val hasSolo = processedTracks.any { it.isSolo }
 
         for (track in processedTracks) {
+            if (track.isMuted) continue
+            if (hasSolo && !track.isSolo) continue
+
             val offsetFrames = ((track.delayOffsetMs * targetSampleRate) / 1000L).toInt()
             val samples = track.audioData.samples
             val vol = track.volume
+            val panClamped = track.pan.coerceIn(-1.0f, 1.0f)
             val trackFrames = samples.size / targetChannels
 
             for (f in 0 until trackFrames) {
                 val destFrame = offsetFrames + f
                 for (c in 0 until targetChannels) {
                     val sampleFloat = samples[f * targetChannels + c].toFloat() / Short.MAX_VALUE
-                    sumBuffer[destFrame * targetChannels + c] += sampleFloat * vol
+                    val panGain = if (targetChannels == 2) {
+                        if (c == 0) (1.0f - panClamped) / 2.0f else (1.0f + panClamped) / 2.0f
+                    } else 1.0f
+                    sumBuffer[destFrame * targetChannels + c] += sampleFloat * vol * panGain
                 }
             }
         }
@@ -76,7 +88,7 @@ object AudioMixer {
         // Render to ShortArray with soft saturation limiting
         val finalSamples = ShortArray(sumBuffer.size)
         for (i in sumBuffer.indices) {
-            val raw = sumBuffer[i]
+            val raw = sumBuffer[i] * masterVolume
             // Soft clipping using tanh
             val limited = if (abs(raw) > 1.0f) {
                 tanh(raw.toDouble()).toFloat()

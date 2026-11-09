@@ -181,36 +181,54 @@ fun AudioMasteringAndEffectsScreen(
                 }
             }
 
-            // 3-Band Parametric EQ
+            // 3-Band / 5-Band Parametric EQ
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
-                    Text("3-BAND PARAMETRIC EQUALIZER", style = MaterialTheme.typography.labelSmall, color = PrimaryIndigoLight, fontWeight = FontWeight.Bold)
+                    Text("PARAMETRIC EQUALIZER & TONE SHAPING", style = MaterialTheme.typography.labelSmall, color = PrimaryIndigoLight, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Bass (100 Hz): ${"%.1f".format(bassGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
+                    Text("Sub / Low Bass (80 Hz): ${"%.1f".format(bassGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = bassGain, onValueChange = { bassGain = it }, valueRange = -12f..12f)
 
-                    Text("Mid (1 kHz): ${"%.1f".format(midGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
+                    Text("Mid Range (1 kHz): ${"%.1f".format(midGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = midGain, onValueChange = { midGain = it }, valueRange = -12f..12f)
 
-                    Text("Treble (10 kHz): ${"%.1f".format(trebleGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
+                    Text("Highs & Air (10 kHz): ${"%.1f".format(trebleGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = trebleGain, onValueChange = { trebleGain = it }, valueRange = -12f..12f)
 
-                    Button(
-                        onClick = {
-                            activeAudio = AudioEqualizerProcessor.apply3Band(activeAudio, bassGain.toDouble(), midGain.toDouble(), trebleGain.toDouble())
-                            statusText = "Applied 3-band parametric EQ."
-                        },
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
-                        shape = RoundedCornerShape(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.Tune, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Apply EQ Shaping")
+                        Button(
+                            onClick = {
+                                activeAudio = AudioEqualizerProcessor.apply3Band(activeAudio, bassGain.toDouble(), midGain.toDouble(), trebleGain.toDouble())
+                                statusText = "Applied 3-band parametric EQ."
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(Icons.Default.Tune, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Apply EQ")
+                        }
+                        Button(
+                            onClick = {
+                                bassGain = 0f
+                                midGain = 0f
+                                trebleGain = 0f
+                                statusText = "Reset EQ sliders to flat 0 dB."
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Flat Reset", color = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                 }
             }

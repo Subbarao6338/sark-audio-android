@@ -43,6 +43,13 @@ fun AudioCreatorScreen(
     var morseText by remember { mutableStateOf("SARK AUDIO") }
     var silenceDurationMs by remember { mutableStateOf(1000f) }
 
+    // ADSR Envelope States
+    var enableAdsr by remember { mutableStateOf(false) }
+    var adsrAttack by remember { mutableStateOf(0.05f) }
+    var adsrDecay by remember { mutableStateOf(0.1f) }
+    var adsrSustain by remember { mutableStateOf(0.7f) }
+    var adsrRelease by remember { mutableStateOf(0.1f) }
+
     var generatedAudio by remember {
         mutableStateOf(
             AudioToneGenerator.generateTone(
@@ -213,6 +220,8 @@ fun AudioCreatorScreen(
                                 listOf(
                                     AudioToneGenerator.WaveformType.WHITE_NOISE,
                                     AudioToneGenerator.WaveformType.PINK_NOISE,
+                                    AudioToneGenerator.WaveformType.BROWN_NOISE,
+                                    AudioToneGenerator.WaveformType.HARMONICS,
                                     AudioToneGenerator.WaveformType.CHIRP
                                 ).forEach { type ->
                                     FilterChip(
@@ -238,6 +247,32 @@ fun AudioCreatorScreen(
                                 onValueChange = { durationSec = it },
                                 valueRange = 0.5f..5.0f
                             )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("ADSR Amplitude Envelope", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                                Switch(checked = enableAdsr, onCheckedChange = { enableAdsr = it })
+                            }
+
+                            if (enableAdsr) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text("Attack: ${"%.2f".format(adsrAttack)}s", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Slider(value = adsrAttack, onValueChange = { adsrAttack = it }, valueRange = 0.01f..1.0f)
+
+                                Text("Decay: ${"%.2f".format(adsrDecay)}s", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Slider(value = adsrDecay, onValueChange = { adsrDecay = it }, valueRange = 0.01f..1.0f)
+
+                                Text("Sustain Level: ${(adsrSustain * 100).toInt()}%", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Slider(value = adsrSustain, onValueChange = { adsrSustain = it }, valueRange = 0.0f..1.0f)
+
+                                Text("Release: ${"%.2f".format(adsrRelease)}s", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Slider(value = adsrRelease, onValueChange = { adsrRelease = it }, valueRange = 0.01f..1.0f)
+                            }
                         }
                         "dtmf" -> {
                             OutlinedTextField(
@@ -277,7 +312,13 @@ fun AudioCreatorScreen(
                                     "wave" -> AudioToneGenerator.generateTone(
                                         type = waveformType,
                                         frequencyHz = frequencyHz.toDouble(),
-                                        durationSeconds = durationSec.toDouble()
+                                        durationSeconds = durationSec.toDouble(),
+                                        envelope = if (enableAdsr) AudioToneGenerator.AdsrEnvelope(
+                                            attackSec = adsrAttack.toDouble(),
+                                            decaySec = adsrDecay.toDouble(),
+                                            sustainLevel = adsrSustain.toDouble(),
+                                            releaseSec = adsrRelease.toDouble()
+                                        ) else null
                                     )
                                     "dtmf" -> AudioDtmfGenerator.generateDialSequence(dtmfSequence)
                                     "morse" -> AudioDtmfGenerator.generateMorseCode(morseText)

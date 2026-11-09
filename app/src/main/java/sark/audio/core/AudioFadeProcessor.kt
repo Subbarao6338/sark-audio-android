@@ -10,7 +10,7 @@ import kotlin.math.sin
 object AudioFadeProcessor {
 
     enum class FadeCurve {
-        LINEAR, S_CURVE
+        LINEAR, S_CURVE, EXPONENTIAL, LOGARITHMIC
     }
 
     /**
@@ -75,6 +75,14 @@ object AudioFadeProcessor {
             FadeCurve.S_CURVE -> {
                 // Quarter-sine wave smooth power curve
                 sin(progress * (PI / 2.0)).toFloat().coerceIn(0f, 1f)
+            }
+            FadeCurve.EXPONENTIAL -> {
+                // Smooth exponential rise
+                (progress * progress).coerceIn(0f, 1f)
+            }
+            FadeCurve.LOGARITHMIC -> {
+                // Perceptually uniform logarithmic curve
+                kotlin.math.sqrt(progress.toDouble()).toFloat().coerceIn(0f, 1f)
             }
         }
     }
