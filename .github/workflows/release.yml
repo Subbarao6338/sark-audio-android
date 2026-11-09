@@ -22,29 +22,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 27
-        uses: actions/setup-java@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '27'
+          java-version: '21'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
 
-      - name: Generate build keystore
+      - name: Restore Keystore Cache
+        id: keystore-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/release.keystore
+          key: sark-audio-signing-keystore-v1
+
+      - name: Generate Keystore Once
+        if: steps.keystore-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/.android
-          keytool -genkeypair -v \
-            -keystore ~/.android/release.keystore \
-            -alias androidreleasekey \
-            -storepass android \
-            -keypass android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Sark Audio,O=Sark,C=US"
+          if [ ! -f ~/.android/release.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore ~/.android/release.keystore \
+              -alias androidreleasekey \
+              -storepass android \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Sark Audio,O=Sark,C=US"
+          fi
 
       - name: Grant execute permissions for gradlew
         run: chmod +x gradlew
