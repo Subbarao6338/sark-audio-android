@@ -8,6 +8,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 // Dynamic Build & Versioning Strategy
 // Supports CI GITHUB_RUN_NUMBER / property injection or falls back locally
 val rawVersionCode = project.findProperty("versionCode")?.toString()?.toIntOrNull()
