@@ -7,6 +7,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -38,10 +41,26 @@ fun AudioFileManagerScreen(
     var currentPlayingFile by remember { mutableStateOf<String?>(null) }
     var renameDialogTarget by remember { mutableStateOf<SavedAudioFile?>(null) }
     var renameInput by remember { mutableStateOf("") }
+    var importStatus by remember { mutableStateOf<String?>(null) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                val loaded = AudioSystemLoader.loadFromUri(context, uri)
+                val baseName = loaded.fileName.removeSuffix(".wav")
+                val saved = manager.saveAudio(loaded.audioData, baseName)
+                filesList = manager.listFiles()
+                importStatus = "Imported ${saved.name} into audio library."
+            } catch (e: Exception) {
+                importStatus = "Failed to import file: ${e.message}"
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (filesList.isEmpty()) {
-            // Seed a starter sample track
             val demo = AudioToneGenerator.generateTone(AudioToneGenerator.WaveformType.SINE, 440.0, durationSeconds = 3.0)
             manager.saveAudio(demo, "demo_take_01")
             filesList = manager.listFiles()
@@ -84,15 +103,35 @@ fun AudioFileManagerScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                IconButton(
-                    onClick = {
-                        val sample = AudioToneGenerator.generateTone(AudioToneGenerator.WaveformType.SAWTOOTH, 520.0, durationSeconds = 2.0)
-                        manager.saveAudio(sample, "take_${System.currentTimeMillis() % 10000}")
-                        filesList = manager.listFiles()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Button(
+                        onClick = { importLauncher.launch("audio/*") },
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Import from Device", fontSize = 12.sp)
                     }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Create Sample", tint = AccentTeal)
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    IconButton(
+                        onClick = {
+                            val sample = AudioToneGenerator.generateTone(AudioToneGenerator.WaveformType.SAWTOOTH, 520.0, durationSeconds = 2.0)
+                            manager.saveAudio(sample, "take_${System.currentTimeMillis() % 10000}")
+                            filesList = manager.listFiles()
+                        }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Create Sample", tint = AccentTeal)
+                    }
                 }
+            }
+
+            if (importStatus != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(importStatus ?: "", color = AccentTeal, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(10.dp))

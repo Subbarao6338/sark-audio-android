@@ -15,22 +15,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.components.WaveformVisualizer
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioVocalSuiteScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
     val player = remember { AudioPlaybackController() }
     val playbackState by player.playbackState.collectAsState()
     val currentPositionMs by player.currentPositionMs.collectAsState()
 
+    var currentFileName by remember { mutableStateOf("demo_vocal.wav") }
     var activeAudio by remember {
         mutableStateOf(
             AudioToneGenerator.generateTone(
@@ -83,6 +89,15 @@ fun AudioVocalSuiteScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AudioFileSelectorBar(
+                currentFileName = currentFileName,
+                onAudioLoaded = { loaded ->
+                    activeAudio = loaded.audioData
+                    currentFileName = loaded.fileName
+                    statusText = "Loaded vocal audio: ${loaded.fileName}"
+                }
+            )
+
             // Waveform Monitor
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -311,6 +326,20 @@ fun AudioVocalSuiteScreen(
             }
 
             Text(statusText, color = AccentTeal, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+
+            Button(
+                onClick = {
+                    val saved = manager.saveAudio(activeAudio, "vocal_${System.currentTimeMillis() % 10000}")
+                    statusText = "Saved processed vocal audio: ${saved.name}"
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Icon(Icons.Default.Save, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Save Processed Audio to Library")
+            }
         }
     }
 }

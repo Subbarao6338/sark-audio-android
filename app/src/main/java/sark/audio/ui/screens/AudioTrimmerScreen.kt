@@ -13,26 +13,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.AudioData
+import sark.audio.core.AudioFileManager
 import sark.audio.core.AudioPlaybackController
 import sark.audio.core.AudioTrimmer
 import sark.audio.core.WavFileProcessor
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.components.WaveformVisualizer
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioTrimmerScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
     val player = remember { AudioPlaybackController() }
     val playbackState by player.playbackState.collectAsState()
     val currentPositionMs by player.currentPositionMs.collectAsState()
 
+    var currentFileName by remember { mutableStateOf("sample_tone.wav") }
     var activeAudio by remember {
         mutableStateOf(
             WavFileProcessor.generateSineWave(
@@ -100,6 +107,19 @@ fun AudioTrimmerScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
+                AudioFileSelectorBar(
+                    currentFileName = currentFileName,
+                    onAudioLoaded = { loaded ->
+                        activeAudio = loaded.audioData
+                        currentFileName = loaded.fileName
+                        startCutMs = 0L
+                        endCutMs = loaded.audioData.header.durationMs
+                        snackbarMessage = "Loaded: ${loaded.fileName}"
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
@@ -268,7 +288,8 @@ fun AudioTrimmerScreen(
                             activeAudio = AudioTrimmer.trim(activeAudio, startCutMs, endCutMs)
                             startCutMs = 0L
                             endCutMs = activeAudio.header.durationMs
-                            snackbarMessage = "Trimmed selected segment successfully."
+                            val saved = manager.saveAudio(activeAudio, "trimmed_${System.currentTimeMillis() % 10000}")
+                            snackbarMessage = "Trimmed segment saved to library: ${saved.name}"
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
@@ -284,7 +305,8 @@ fun AudioTrimmerScreen(
                             activeAudio = AudioTrimmer.cutOut(activeAudio, startCutMs, endCutMs)
                             startCutMs = 0L
                             endCutMs = activeAudio.header.durationMs
-                            snackbarMessage = "Deleted selected segment successfully."
+                            val saved = manager.saveAudio(activeAudio, "cut_${System.currentTimeMillis() % 10000}")
+                            snackbarMessage = "Cut result saved to library: ${saved.name}"
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentCoral),

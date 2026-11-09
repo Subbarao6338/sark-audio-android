@@ -10,10 +10,12 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.theme.*
 import java.io.File
 
@@ -22,12 +24,16 @@ import java.io.File
 fun AudioConverterAndSplitterScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
+
     var selectedTab by remember { mutableStateOf(0) } // 0 = Converter, 1 = Track Splitter, 2 = Bulk Converter
     var targetSampleRate by remember { mutableStateOf(44100) }
     var targetChannels by remember { mutableStateOf(2) }
     var splitDurationSec by remember { mutableStateOf(15f) }
     var statusText by remember { mutableStateOf("Ready to convert or split audio.") }
 
+    var currentFileName by remember { mutableStateOf("demo_long_track.wav") }
     var sampleAudio by remember {
         mutableStateOf(
             AudioToneGenerator.generateTone(
@@ -58,6 +64,17 @@ fun AudioConverterAndSplitterScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AudioFileSelectorBar(
+                currentFileName = currentFileName,
+                mimeType = "*/*",
+                buttonText = "Open Audio/Video File",
+                onAudioLoaded = { loaded ->
+                    sampleAudio = loaded.audioData
+                    currentFileName = loaded.fileName
+                    statusText = "Loaded: ${loaded.fileName} (${loaded.audioData.header.sampleRate} Hz, ${loaded.audioData.header.channels} ch, ${(loaded.audioData.header.durationMs / 1000)}s)"
+                }
+            )
+
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
@@ -109,25 +126,31 @@ fun AudioConverterAndSplitterScreen(
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    var converted = sampleAudio
-                                    if (converted.header.sampleRate != targetSampleRate) {
-                                        converted = AudioTimePitchProcessor.resample(converted, targetSampleRate)
-                                    }
-                                    if (converted.header.channels != targetChannels) {
-                                        converted = if (targetChannels == 2) AudioMerger.monoToStereo(converted) else AudioMerger.stereoToMono(converted)
-                                    }
-                                    sampleAudio = converted
-                                    statusText = "Converted: ${converted.header.sampleRate} Hz, ${converted.header.channels} channels."
-                                },
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
-                                shape = RoundedCornerShape(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Default.Transform, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Convert Audio Track")
+                                Button(
+                                    onClick = {
+                                        var converted = sampleAudio
+                                        if (converted.header.sampleRate != targetSampleRate) {
+                                            converted = AudioTimePitchProcessor.resample(converted, targetSampleRate)
+                                        }
+                                        if (converted.header.channels != targetChannels) {
+                                            converted = if (targetChannels == 2) AudioMerger.monoToStereo(converted) else AudioMerger.stereoToMono(converted)
+                                        }
+                                        sampleAudio = converted
+                                        val saved = manager.saveAudio(converted, "conv_${System.currentTimeMillis() % 10000}")
+                                        statusText = "Converted & saved: ${saved.name} (${converted.header.sampleRate} Hz, ${converted.header.channels} ch)."
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Transform, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Convert & Save")
+                                }
                             }
                         }
                     }
@@ -155,7 +178,10 @@ fun AudioConverterAndSplitterScreen(
                                 Button(
                                     onClick = {
                                         val parts = AudioTrackSplitter.splitByDuration(sampleAudio, (splitDurationSec * 1000).toLong())
-                                        statusText = "Split into ${parts.size} tracks of ${splitDurationSec.toInt()}s each."
+                                        parts.forEachIndexed { idx, part ->
+                                            manager.saveAudio(part, "split_${idx + 1}_${System.currentTimeMillis() % 1000}")
+                                        }
+                                        statusText = "Split into ${parts.size} tracks of ${splitDurationSec.toInt()}s each and saved to library."
                                     },
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.buttonColors(containerColor = AccentCoral),
@@ -166,7 +192,10 @@ fun AudioConverterAndSplitterScreen(
                                 Button(
                                     onClick = {
                                         val parts = AudioTrackSplitter.splitBySilence(sampleAudio)
-                                        statusText = "Detected pauses: split into ${parts.size} tracks."
+                                        parts.forEachIndexed { idx, part ->
+                                            manager.saveAudio(part, "pause_split_${idx + 1}_${System.currentTimeMillis() % 1000}")
+                                        }
+                                        statusText = "Detected pauses: saved ${parts.size} split tracks to library."
                                     },
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.buttonColors(containerColor = AccentTeal),

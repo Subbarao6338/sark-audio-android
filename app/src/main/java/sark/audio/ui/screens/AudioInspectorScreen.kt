@@ -12,17 +12,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioInspectorScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
+
+    var currentFileName by remember { mutableStateOf("master_take_01.wav") }
     var activeAudio by remember {
         mutableStateOf(
             WavFileProcessor.generateSineWave(
@@ -36,15 +43,15 @@ fun AudioInspectorScreen(
     }
 
     var metadata by remember {
-        mutableStateOf(AudioMetadataInspector.inspectAudioData(activeAudio, "master_take_01.wav"))
+        mutableStateOf(AudioMetadataInspector.inspectAudioData(activeAudio, currentFileName))
     }
 
     var targetSampleRate by remember { mutableStateOf(44100) }
     var targetChannels by remember { mutableStateOf(1) }
     var conversionStatus by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(activeAudio) {
-        metadata = AudioMetadataInspector.inspectAudioData(activeAudio, "master_take_01.wav")
+    LaunchedEffect(activeAudio, currentFileName) {
+        metadata = AudioMetadataInspector.inspectAudioData(activeAudio, currentFileName)
     }
 
     Scaffold(
@@ -69,6 +76,15 @@ fun AudioInspectorScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AudioFileSelectorBar(
+                currentFileName = currentFileName,
+                onAudioLoaded = { loaded ->
+                    activeAudio = loaded.audioData
+                    currentFileName = loaded.fileName
+                    conversionStatus = "Loaded ${loaded.fileName} for inspection."
+                }
+            )
+
             // Audio File Information Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -147,29 +163,48 @@ fun AudioInspectorScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 
-                    Button(
-                        onClick = {
-                            var converted = activeAudio
-                            if (converted.header.sampleRate != targetSampleRate) {
-                                converted = AudioTimePitchProcessor.resample(converted, targetSampleRate)
-                            }
-                            if (converted.header.channels != targetChannels) {
-                                converted = if (targetChannels == 2) {
-                                    AudioMerger.monoToStereo(converted)
-                                } else {
-                                    AudioMerger.stereoToMono(converted)
-                                }
-                            }
-                            activeAudio = converted
-                            conversionStatus = "Audio successfully converted to $targetSampleRate Hz, ${if (targetChannels == 2) "Stereo" else "Mono"}."
-                        },
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
-                        shape = RoundedCornerShape(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.Transform, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Convert Audio Format")
+                        Button(
+                            onClick = {
+                                var converted = activeAudio
+                                if (converted.header.sampleRate != targetSampleRate) {
+                                    converted = AudioTimePitchProcessor.resample(converted, targetSampleRate)
+                                }
+                                if (converted.header.channels != targetChannels) {
+                                    converted = if (targetChannels == 2) {
+                                        AudioMerger.monoToStereo(converted)
+                                    } else {
+                                        AudioMerger.stereoToMono(converted)
+                                    }
+                                }
+                                activeAudio = converted
+                                conversionStatus = "Audio converted to $targetSampleRate Hz, ${if (targetChannels == 2) "Stereo" else "Mono"}."
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Transform, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Convert")
+                        }
+
+                        Button(
+                            onClick = {
+                                val saved = manager.saveAudio(activeAudio, "conv_${System.currentTimeMillis() % 10000}")
+                                conversionStatus = "Saved converted WAV to library: ${saved.name}"
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentTeal),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Save, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Save to Library")
+                        }
                     }
                 }
             }

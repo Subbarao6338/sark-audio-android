@@ -13,29 +13,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.components.WaveformVisualizer
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioEffectsScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
     val player = remember { AudioPlaybackController() }
     val playbackState by player.playbackState.collectAsState()
     val currentPositionMs by player.currentPositionMs.collectAsState()
 
-    val originalAudio = remember {
-        WavFileProcessor.generateSineWave(
-            sampleRate = 44100,
-            frequencyHz = 520.0,
-            durationSeconds = 4.0,
-            channels = 1,
-            amplitude = 0.4f
+    var currentFileName by remember { mutableStateOf("demo_lead.wav") }
+    var originalAudio by remember {
+        mutableStateOf(
+            WavFileProcessor.generateSineWave(
+                sampleRate = 44100,
+                frequencyHz = 520.0,
+                durationSeconds = 4.0,
+                channels = 1,
+                amplitude = 0.4f
+            )
         )
     }
 
@@ -94,6 +102,18 @@ fun AudioEffectsScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
+                AudioFileSelectorBar(
+                    currentFileName = currentFileName,
+                    onAudioLoaded = { loaded ->
+                        originalAudio = loaded.audioData
+                        processedAudio = loaded.audioData
+                        currentFileName = loaded.fileName
+                        statusMessage = "Loaded ${loaded.fileName} from device."
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
@@ -248,22 +268,43 @@ fun AudioEffectsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = {
-                        var res = AudioGainProcessor.applyGain(originalAudio, volumeMultiplier)
-                        res = AudioTimePitchProcessor.changeSpeed(res, speedMultiplier)
-                        processedAudio = res
-                        statusMessage = "Applied Volume (${(volumeMultiplier * 100).toInt()}%) & Speed (${"%.2f".format(speedMultiplier)}x)."
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentAmber),
-                    shape = RoundedCornerShape(12.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(Icons.Default.Tune, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Process & Render Audio", fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = {
+                            var res = AudioGainProcessor.applyGain(originalAudio, volumeMultiplier)
+                            res = AudioTimePitchProcessor.changeSpeed(res, speedMultiplier)
+                            processedAudio = res
+                            statusMessage = "Applied Volume (${(volumeMultiplier * 100).toInt()}%) & Speed (${"%.2f".format(speedMultiplier)}x)."
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentAmber),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Tune, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Apply Effects", fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Button(
+                        onClick = {
+                            val saved = manager.saveAudio(processedAudio, "fx_${System.currentTimeMillis() % 10000}")
+                            statusMessage = "Rendered & saved to library: ${saved.name}"
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Save, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Save to Library", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
