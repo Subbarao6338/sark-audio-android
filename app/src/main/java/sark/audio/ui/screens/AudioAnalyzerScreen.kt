@@ -14,10 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +27,7 @@ import sark.audio.ui.theme.*
 fun AudioAnalyzerScreen(
     onBack: () -> Unit
 ) {
+    var currentFileName by remember { mutableStateOf("demo_tone_520Hz.wav") }
     var activeAudio by remember {
         mutableStateOf(
             AudioToneGenerator.generateTone(
@@ -70,6 +73,14 @@ fun AudioAnalyzerScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AudioFileSelectorBar(
+                currentFileName = currentFileName,
+                onAudioLoaded = { loaded ->
+                    activeAudio = loaded.audioData
+                    currentFileName = loaded.fileName
+                }
+            )
+
             // Tuner Card
             Card(
                 modifier = Modifier.fillMaxWidth(),

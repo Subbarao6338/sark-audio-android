@@ -15,18 +15,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
 import sark.audio.ui.components.WaveformVisualizer
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioCreatorScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
     val player = remember { AudioPlaybackController() }
     val playbackState by player.playbackState.collectAsState()
     val currentPositionMs by player.currentPositionMs.collectAsState()
@@ -263,27 +267,52 @@ fun AudioCreatorScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = {
-                            generatedAudio = when (selectedMode) {
-                                "wave" -> AudioToneGenerator.generateTone(
-                                    type = waveformType,
-                                    frequencyHz = frequencyHz.toDouble(),
-                                    durationSeconds = durationSec.toDouble()
-                                )
-                                "dtmf" -> AudioDtmfGenerator.generateDialSequence(dtmfSequence)
-                                "morse" -> AudioDtmfGenerator.generateMorseCode(morseText)
-                                else -> AudioSilenceGenerator.generateSilence(silenceDurationMs.toLong())
-                            }
-                            statusMessage = "Successfully synthesized audio."
-                        },
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentCoral),
-                        shape = RoundedCornerShape(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.Bolt, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Synthesize Waveform")
+                        Button(
+                            onClick = {
+                                generatedAudio = when (selectedMode) {
+                                    "wave" -> AudioToneGenerator.generateTone(
+                                        type = waveformType,
+                                        frequencyHz = frequencyHz.toDouble(),
+                                        durationSeconds = durationSec.toDouble()
+                                    )
+                                    "dtmf" -> AudioDtmfGenerator.generateDialSequence(dtmfSequence)
+                                    "morse" -> AudioDtmfGenerator.generateMorseCode(morseText)
+                                    else -> AudioSilenceGenerator.generateSilence(silenceDurationMs.toLong())
+                                }
+                                statusMessage = "Successfully synthesized audio."
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentCoral),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Bolt, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Synthesize")
+                        }
+
+                        Button(
+                            onClick = {
+                                val baseName = when (selectedMode) {
+                                    "wave" -> "synth_${waveformType.name.lowercase()}_${frequencyHz.toInt()}Hz"
+                                    "dtmf" -> "dtmf_${dtmfSequence}"
+                                    "morse" -> "morse_code"
+                                    else -> "silence_${silenceDurationMs.toInt()}ms"
+                                }
+                                val saved = manager.saveAudio(generatedAudio, baseName)
+                                statusMessage = "Saved to library: ${saved.name}"
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Save, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Save File")
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))

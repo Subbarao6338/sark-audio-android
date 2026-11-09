@@ -13,18 +13,20 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import sark.audio.core.AudioData
-import sark.audio.core.AudioMerger
-import sark.audio.core.AudioPlaybackController
-import sark.audio.core.WavFileProcessor
+import sark.audio.core.*
 import sark.audio.ui.components.WaveformVisualizer
 import sark.audio.ui.theme.*
+import java.io.File
 
 data class TrackItem(
     val id: String,
@@ -38,6 +40,8 @@ data class TrackItem(
 fun AudioMergerScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
     val player = remember { AudioPlaybackController() }
     val playbackState by player.playbackState.collectAsState()
     val currentPositionMs by player.currentPositionMs.collectAsState()
@@ -67,6 +71,30 @@ fun AudioMergerScreen(
     var mergedWaveform by remember { mutableStateOf<FloatArray?>(null) }
     var crossfadeMs by remember { mutableStateOf(200f) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                val loaded = AudioSystemLoader.loadFromUri(context, uri)
+                val nextId = (trackList.size + 1).toString()
+                trackList.add(
+                    TrackItem(
+                        id = nextId,
+                        title = loaded.fileName,
+                        audioData = loaded.audioData,
+                        waveform = WavFileProcessor.extractWaveformAmplitudes(
+                            loaded.audioData.samples,
+                            loaded.audioData.header.channels,
+                            40
+                        )
+                    )
+                )
+                statusMessage = "Added file: ${loaded.fileName}"
+            } catch (_: Exception) {}
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -103,24 +131,39 @@ fun AudioMergerScreen(
                 ) {
                     Text("TRACK SEQUENCER (${trackList.size})", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
 
-                    TextButton(
-                        onClick = {
-                            val nextId = (trackList.size + 1).toString()
-                            val freq = 300.0 + (trackList.size * 150)
-                            val newTone = WavFileProcessor.generateSineWave(44100, freq, 1.5, 1)
-                            trackList.add(
-                                TrackItem(
-                                    id = nextId,
-                                    title = "Clip $nextId - Synth (${freq.toInt()}Hz)",
-                                    audioData = newTone,
-                                    waveform = WavFileProcessor.extractWaveformAmplitudes(newTone.samples, 1, 40)
-                                )
-                            )
+                    Row {
+                        Button(
+                            onClick = { filePickerLauncher.launch("audio/*") },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Open File", fontSize = 12.sp)
                         }
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = PrimaryIndigoLight, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Clip", color = PrimaryIndigoLight)
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        TextButton(
+                            onClick = {
+                                val nextId = (trackList.size + 1).toString()
+                                val freq = 300.0 + (trackList.size * 150)
+                                val newTone = WavFileProcessor.generateSineWave(44100, freq, 1.5, 1)
+                                trackList.add(
+                                    TrackItem(
+                                        id = nextId,
+                                        title = "Clip $nextId - Synth (${freq.toInt()}Hz)",
+                                        audioData = newTone,
+                                        waveform = WavFileProcessor.extractWaveformAmplitudes(newTone.samples, 1, 40)
+                                    )
+                                )
+                            }
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, tint = PrimaryIndigoLight, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Add Tone", color = PrimaryIndigoLight)
+                        }
                     }
                 }
 
@@ -267,24 +310,30 @@ fun AudioMergerScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = {
-                        val tracks = trackList.map { it.audioData }
-                        val merged = AudioMerger.mergeTracks(tracks, crossfadeMs.toInt())
-                        mergedAudio = merged
-                        mergedWaveform = WavFileProcessor.extractWaveformAmplitudes(merged.samples, merged.header.channels, 60)
-                        player.load(merged)
-                        statusMessage = "Merged ${tracks.size} tracks into ${merged.header.durationMs}ms master audio."
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentTeal),
-                    shape = RoundedCornerShape(12.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.MergeType, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Merge & Synthesize Audio", fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = {
+                            val tracks = trackList.map { it.audioData }
+                            val merged = AudioMerger.mergeTracks(tracks, crossfadeMs.toInt())
+                            mergedAudio = merged
+                            mergedWaveform = WavFileProcessor.extractWaveformAmplitudes(merged.samples, merged.header.channels, 60)
+                            player.load(merged)
+                            val saved = manager.saveAudio(merged, "merged_${System.currentTimeMillis() % 10000}")
+                            statusMessage = "Merged ${tracks.size} tracks & saved to library: ${saved.name}"
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentTeal),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.MergeType, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Merge & Save", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +44,11 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     var currentScreen by remember { mutableStateOf("dashboard") }
+
+                    // Intercept system back navigation when not on dashboard
+                    BackHandler(enabled = currentScreen != "dashboard") {
+                        currentScreen = "dashboard"
+                    }
 
                     when (currentScreen) {
                         "dashboard" -> AudioDashboardScreen(

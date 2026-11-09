@@ -11,17 +11,32 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import sark.audio.core.*
+import sark.audio.ui.components.AudioFileSelectorBar
 import sark.audio.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioTagEditorScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val manager = remember { AudioFileManager(File(context.filesDir, "audio_library")) }
+
+    var currentFileName by remember { mutableStateOf<String?>("Summer Vibe Master.wav") }
+    var activeAudio by remember {
+        mutableStateOf(
+            AudioToneGenerator.generateTone(
+                AudioToneGenerator.WaveformType.SINE, 440.0, durationSeconds = 3.0
+            )
+        )
+    }
+
     var title by remember { mutableStateOf("Summer Vibe Master") }
     var artist by remember { mutableStateOf("Sark Audio") }
     var album by remember { mutableStateOf("Electronic Horizons") }
@@ -54,6 +69,16 @@ fun AudioTagEditorScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            AudioFileSelectorBar(
+                currentFileName = currentFileName,
+                onAudioLoaded = { loaded ->
+                    activeAudio = loaded.audioData
+                    currentFileName = loaded.fileName
+                    title = loaded.fileName.removeSuffix(".wav")
+                    saveStatus = "Loaded ${loaded.fileName} for tag editing."
+                }
+            )
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
@@ -124,7 +149,19 @@ fun AudioTagEditorScreen(
 
                     Button(
                         onClick = {
-                            saveStatus = "Audio metadata tags saved into RIFF INFO chunk."
+                            val tags = AudioTagMetadata(
+                                title = title,
+                                artist = artist,
+                                album = album,
+                                year = year,
+                                genre = genre,
+                                trackNumber = trackNumber,
+                                comment = comment
+                            )
+                            val outName = (title.ifBlank { "tagged_track" }) + ".wav"
+                            val dest = File(File(context.filesDir, "audio_library"), outName)
+                            AudioTagEditor.writeTags(activeAudio, tags, dest)
+                            saveStatus = "Audio metadata saved: ${dest.name} in audio library."
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
