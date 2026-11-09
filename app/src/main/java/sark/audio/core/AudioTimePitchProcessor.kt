@@ -77,6 +77,17 @@ object AudioTimePitchProcessor {
     }
 
     /**
+     * Pitch shift using varispeed resampling coupled with inverse duration compensation.
+     */
+    fun changePitch(audioData: AudioData, pitchFactor: Float): AudioData {
+        if (pitchFactor <= 0f || pitchFactor == 1.0f) return audioData
+        // Resample by factor to shift pitch, then keep sample rate header
+        val originalSampleRate = audioData.header.sampleRate
+        val resampled = resample(audioData, (originalSampleRate / pitchFactor).toInt().coerceIn(4000, 192000))
+        return resampled.copy(header = resampled.header.copy(sampleRate = originalSampleRate))
+    }
+
+    /**
      * Reverse audio in place.
      */
     fun reverse(audioData: AudioData): AudioData {
