@@ -67,13 +67,13 @@ fun AudioVocalSuiteScreen(
                 title = { Text("Vocal, Karaoke & Autotune Suite") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -86,11 +86,11 @@ fun AudioVocalSuiteScreen(
             // Waveform Monitor
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("AUDIO PLAYBACK MONITOR", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("AUDIO PLAYBACK MONITOR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(14.dp))
                     WaveformVisualizer(
                         amplitudes = waveformAmplitudes,
@@ -123,9 +123,9 @@ fun AudioVocalSuiteScreen(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(DarkBackground)
+                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -134,13 +134,13 @@ fun AudioVocalSuiteScreen(
             // Karaoke / Vocal Remover Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("VOCAL REMOVER & KARAOKE", style = MaterialTheme.typography.labelSmall, color = AccentCoral, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Vocal Cut Strength: ${(vocalCutStrength * 100).toInt()}%", color = TextPrimary, fontSize = 13.sp)
+                    Text("Vocal Cut Strength: ${(vocalCutStrength * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(
                         value = vocalCutStrength,
                         onValueChange = { vocalCutStrength = it },
@@ -176,7 +176,7 @@ fun AudioVocalSuiteScreen(
             // Autotune Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -197,7 +197,7 @@ fun AudioVocalSuiteScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Correction Snap: ${(autotuneStrength * 100).toInt()}%", color = TextPrimary, fontSize = 13.sp)
+                    Text("Correction Snap: ${(autotuneStrength * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(
                         value = autotuneStrength,
                         onValueChange = { autotuneStrength = it },
@@ -222,7 +222,7 @@ fun AudioVocalSuiteScreen(
             // Voice Changer Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -275,7 +275,7 @@ fun AudioVocalSuiteScreen(
             // Stems & Voice Clone Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {

@@ -58,13 +58,13 @@ fun AudioFileManagerScreen(
                 title = { Text("Audio Library Manager") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -80,7 +80,7 @@ fun AudioFileManagerScreen(
                 Text(
                     "SAVED AUDIO FILES (${filesList.size})",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -99,7 +99,7 @@ fun AudioFileManagerScreen(
 
             if (filesList.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No audio recordings found in library.", color = TextSecondary)
+                    Text("No audio recordings found in library.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyColumn(
@@ -111,7 +111,7 @@ fun AudioFileManagerScreen(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = DarkCard),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Row(
@@ -148,11 +148,11 @@ fun AudioFileManagerScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
 
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(audioFile.name, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                                    Text(audioFile.name, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         "${audioFile.durationMs / 1000}s • ${audioFile.sampleRate} Hz • ${if (audioFile.channels == 2) "Stereo" else "Mono"} • ${audioFile.sizeBytes / 1024} KB",
-                                        color = TextSecondary,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 12.sp
                                     )
                                 }
@@ -163,7 +163,7 @@ fun AudioFileManagerScreen(
                                         renameInput = audioFile.name.removeSuffix(".wav")
                                     }
                                 ) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Rename", tint = TextSecondary, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Edit, contentDescription = "Rename", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                                 }
 
                                 IconButton(

@@ -81,13 +81,13 @@ fun AudioCreatorScreen(
                 title = { Text("Audio Creator & Synthesizer") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -100,7 +100,7 @@ fun AudioCreatorScreen(
             // Waveform Monitor Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
@@ -108,7 +108,7 @@ fun AudioCreatorScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("SYNTHESIS MONITOR", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                        Text("SYNTHESIS MONITOR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                         Text("${generatedAudio.header.durationMs} ms", color = AccentCoral, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
 
@@ -148,9 +148,9 @@ fun AudioCreatorScreen(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(DarkBackground)
+                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -164,7 +164,7 @@ fun AudioCreatorScreen(
                     "morse" -> 2
                     else -> 3
                 },
-                containerColor = DarkCard,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
                 contentColor = PrimaryIndigoLight
             ) {
                 Tab(selected = selectedMode == "wave", onClick = { selectedMode = "wave" }, text = { Text("Waveforms") })
@@ -176,13 +176,13 @@ fun AudioCreatorScreen(
             // Controls Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     when (selectedMode) {
                         "wave" -> {
-                            Text("Waveform Type", color = TextSecondary, fontSize = 13.sp)
+                            Text("Waveform Type", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -221,14 +221,14 @@ fun AudioCreatorScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text("Frequency: ${frequencyHz.toInt()} Hz", color = TextPrimary, fontSize = 14.sp)
+                            Text("Frequency: ${frequencyHz.toInt()} Hz", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                             Slider(
                                 value = frequencyHz,
                                 onValueChange = { frequencyHz = it },
                                 valueRange = 40f..4000f
                             )
 
-                            Text("Duration: ${"%.1f".format(durationSec)}s", color = TextPrimary, fontSize = 14.sp)
+                            Text("Duration: ${"%.1f".format(durationSec)}s", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                             Slider(
                                 value = durationSec,
                                 onValueChange = { durationSec = it },
@@ -252,7 +252,7 @@ fun AudioCreatorScreen(
                             )
                         }
                         "silence" -> {
-                            Text("Silence Duration: ${silenceDurationMs.toInt()} ms", color = TextPrimary, fontSize = 14.sp)
+                            Text("Silence Duration: ${silenceDurationMs.toInt()} ms", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                             Slider(
                                 value = silenceDurationMs,
                                 onValueChange = { silenceDurationMs = it },

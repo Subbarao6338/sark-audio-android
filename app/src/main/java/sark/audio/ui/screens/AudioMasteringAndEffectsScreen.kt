@@ -75,13 +75,13 @@ fun AudioMasteringAndEffectsScreen(
                 title = { Text("Mastering, EQ, 8D & Effects") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -94,11 +94,11 @@ fun AudioMasteringAndEffectsScreen(
             // Monitor Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("DSP MONITOR", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("DSP MONITOR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(14.dp))
                     WaveformVisualizer(
                         amplitudes = waveformAmplitudes,
@@ -131,9 +131,9 @@ fun AudioMasteringAndEffectsScreen(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(DarkBackground)
+                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -142,13 +142,13 @@ fun AudioMasteringAndEffectsScreen(
             // Mastering Engine
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("SOUND MASTERING ENGINE", style = MaterialTheme.typography.labelSmall, color = AccentAmber, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Multi-band excitation, warm analog tape saturation, stereo widen & -0.1 dBFS ceiling limiter.", color = TextSecondary, fontSize = 12.sp)
+                    Text("Multi-band excitation, warm analog tape saturation, stereo widen & -0.1 dBFS ceiling limiter.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = {
@@ -169,19 +169,19 @@ fun AudioMasteringAndEffectsScreen(
             // 3-Band Parametric EQ
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("3-BAND PARAMETRIC EQUALIZER", style = MaterialTheme.typography.labelSmall, color = PrimaryIndigoLight, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Bass (100 Hz): ${"%.1f".format(bassGain)} dB", color = TextPrimary, fontSize = 13.sp)
+                    Text("Bass (100 Hz): ${"%.1f".format(bassGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = bassGain, onValueChange = { bassGain = it }, valueRange = -12f..12f)
 
-                    Text("Mid (1 kHz): ${"%.1f".format(midGain)} dB", color = TextPrimary, fontSize = 13.sp)
+                    Text("Mid (1 kHz): ${"%.1f".format(midGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = midGain, onValueChange = { midGain = it }, valueRange = -12f..12f)
 
-                    Text("Treble (10 kHz): ${"%.1f".format(trebleGain)} dB", color = TextPrimary, fontSize = 13.sp)
+                    Text("Treble (10 kHz): ${"%.1f".format(trebleGain)} dB", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = trebleGain, onValueChange = { trebleGain = it }, valueRange = -12f..12f)
 
                     Button(
@@ -203,13 +203,13 @@ fun AudioMasteringAndEffectsScreen(
             // 8D Audio & Spatial Ambience
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("8D AUDIO & BINAURAL SPATIAL PANNING", style = MaterialTheme.typography.labelSmall, color = AccentCoral, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Rotation Speed: ${"%.2f".format(eightDSpeedHz)} Hz", color = TextPrimary, fontSize = 13.sp)
+                    Text("Rotation Speed: ${"%.2f".format(eightDSpeedHz)} Hz", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = eightDSpeedHz, onValueChange = { eightDSpeedHz = it }, valueRange = 0.05f..0.5f)
 
                     Button(
@@ -231,7 +231,7 @@ fun AudioMasteringAndEffectsScreen(
             // Chorus & Reverb Remover
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {

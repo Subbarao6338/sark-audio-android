@@ -80,13 +80,13 @@ fun AudioMergerScreen(
                 title = { Text("Audio Merger & Joiner") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -101,7 +101,7 @@ fun AudioMergerScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("TRACK SEQUENCER (${trackList.size})", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("TRACK SEQUENCER (${trackList.size})", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
 
                     TextButton(
                         onClick = {
@@ -135,7 +135,7 @@ fun AudioMergerScreen(
                     itemsIndexed(trackList) { index, track ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = DarkCard),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Row(
@@ -157,8 +157,8 @@ fun AudioMergerScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
 
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(track.title, color = TextPrimary, fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                                    Text("${track.audioData.header.durationMs}ms | ${track.audioData.header.sampleRate}Hz", color = TextSecondary, fontSize = 12.sp)
+                                    Text(track.title, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                                    Text("${track.audioData.header.durationMs}ms | ${track.audioData.header.sampleRate}Hz", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 }
 
                                 IconButton(
@@ -168,7 +168,7 @@ fun AudioMergerScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = TextSecondary, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -180,7 +180,7 @@ fun AudioMergerScreen(
                 // Crossfade setting
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -188,7 +188,7 @@ fun AudioMergerScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Crossfade Transition", style = MaterialTheme.typography.bodySmall, color = TextPrimary)
+                            Text("Crossfade Transition", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                             Text("${crossfadeMs.toInt()} ms", style = MaterialTheme.typography.bodySmall, color = AccentTeal)
                         }
                         Slider(
@@ -209,11 +209,11 @@ fun AudioMergerScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = DarkCard),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("MERGED PREVIEW", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text("MERGED PREVIEW", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(10.dp))
                             WaveformVisualizer(
                                 amplitudes = mergedWaveform!!,

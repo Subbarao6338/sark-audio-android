@@ -42,13 +42,13 @@ fun AudioConverterAndSplitterScreen(
                 title = { Text("Converter & Track Splitter") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -60,7 +60,7 @@ fun AudioConverterAndSplitterScreen(
         ) {
             TabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = DarkCard,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
                 contentColor = PrimaryIndigoLight
             ) {
                 Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Converter") })
@@ -73,14 +73,14 @@ fun AudioConverterAndSplitterScreen(
                     // Converter
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = DarkCard),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
-                            Text("SAMPLE RATE & CHANNEL CONVERTER", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text("SAMPLE RATE & CHANNEL CONVERTER", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Text("Target Sample Rate", color = TextPrimary, fontSize = 13.sp)
+                            Text("Target Sample Rate", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf(16000, 22050, 44100, 48000).forEach { sr ->
@@ -93,7 +93,7 @@ fun AudioConverterAndSplitterScreen(
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
-                            Text("Target Channels", color = TextPrimary, fontSize = 13.sp)
+                            Text("Target Channels", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 FilterChip(
@@ -136,14 +136,14 @@ fun AudioConverterAndSplitterScreen(
                     // Track Splitter
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = DarkCard),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Text("TRACK SPLITTER & AUDIO MARKERS", style = MaterialTheme.typography.labelSmall, color = AccentCoral, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Text("Segment Duration: ${splitDurationSec.toInt()}s", color = TextPrimary, fontSize = 13.sp)
+                            Text("Segment Duration: ${splitDurationSec.toInt()}s", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                             Slider(
                                 value = splitDurationSec,
                                 onValueChange = { splitDurationSec = it },
@@ -182,13 +182,13 @@ fun AudioConverterAndSplitterScreen(
                     // Bulk Converter Queue
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = DarkCard),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Text("BATCH QUEUE PROCESSING", style = MaterialTheme.typography.labelSmall, color = AccentAmber, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Converts queues of audio files with sample rate normalization, bit depth decimation, and peak leveling.", color = TextSecondary, fontSize = 13.sp)
+                            Text("Converts queues of audio files with sample rate normalization, bit depth decimation, and peak leveling.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
 
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
