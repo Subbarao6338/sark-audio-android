@@ -10,8 +10,18 @@ import kotlin.random.Random
 object AudioToneGenerator {
 
     enum class WaveformType {
-        SINE, SQUARE, TRIANGLE, SAWTOOTH, WHITE_NOISE, PINK_NOISE, CHIRP
+        SINE, SQUARE, TRIANGLE, SAWTOOTH, WHITE_NOISE, PINK_NOISE, BROWN_NOISE, HARMONICS, CHIRP
     }
+
+    /**
+     * ADSR Amplitude Envelope Configuration
+     */
+    data class AdsrEnvelope(
+        val attackSec: Double = 0.05,
+        val decaySec: Double = 0.1,
+        val sustainLevel: Double = 0.7,
+        val releaseSec: Double = 0.1
+    )
 
     /**
      * Synthesizes audio samples based on waveform type.
@@ -23,7 +33,9 @@ object AudioToneGenerator {
         durationSeconds: Double = 1.0,
         sampleRate: Int = 44100,
         channels: Int = 1,
-        amplitude: Float = 0.8f
+        amplitude: Float = 0.8f,
+        envelope: AdsrEnvelope? = null,
+        harmonicsWeights: DoubleArray? = null // For HARMONICS additive synthesis [h1, h2, h3, h4]
     ): AudioData {
         val totalFrames = (sampleRate * durationSeconds).toInt().coerceAtLeast(1)
         val totalSamples = totalFrames * channels
@@ -38,6 +50,15 @@ object AudioToneGenerator {
         var b4 = 0.0
         var b5 = 0.0
         var b6 = 0.0
+        var brownLast = 0.0
+
+        val hWeights = harmonicsWeights ?: doubleArrayOf(1.0, 0.5, 0.25, 0.125)
+        val sumHWeights = hWeights.sum().coerceAtLeast(0.001)
+
+        val attackFrames = ((envelope?.attackSec ?: 0.0) * sampleRate).toInt().coerceAtLeast(0)
+        val decayFrames = ((envelope?.decaySec ?: 0.0) * sampleRate).toInt().coerceAtLeast(0)
+        val releaseFrames = ((envelope?.releaseSec ?: 0.0) * sampleRate).toInt().coerceAtLeast(0)
+        val sustainFrames = (totalFrames - attackFrames - decayFrames - releaseFrames).coerceAtLeast(0)
 
         for (i in 0 until totalFrames) {
             val t = i.toDouble() / sampleRate
@@ -73,6 +94,19 @@ object AudioToneGenerator {
                     b6 = white * 0.115926
                     (pink * 0.11).coerceIn(-1.0, 1.0)
                 }
+                WaveformType.BROWN_NOISE -> {
+                    val white = Random.nextDouble(-1.0, 1.0)
+                    brownLast = (brownLast + (0.02 * white)) / 1.02
+                    (brownLast * 3.5).coerceIn(-1.0, 1.0)
+                }
+                WaveformType.HARMONICS -> {
+                    var sum = 0.0
+                    for (h in hWeights.indices) {
+                        val harmonicNum = h + 1
+                        sum += hWeights[h] * sin(2.0 * PI * (frequencyHz * harmonicNum) * t)
+                    }
+                    (sum / sumHWeights).coerceIn(-1.0, 1.0)
+                }
                 WaveformType.CHIRP -> {
                     // Linear frequency sweep
                     val progress = i.toDouble() / totalFrames
@@ -81,7 +115,24 @@ object AudioToneGenerator {
                 }
             }
 
-            val pcmVal = (sampleVal * maxAmp).toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+            // Calculate ADSR gain if envelope provided
+            var envGain = 1.0
+            if (envelope != null) {
+                envGain = when {
+                    i < attackFrames -> if (attackFrames > 0) i.toDouble() / attackFrames else 1.0
+                    i < attackFrames + decayFrames -> {
+                        val decayProgress = (i - attackFrames).toDouble() / decayFrames.coerceAtLeast(1)
+                        1.0 - (1.0 - envelope.sustainLevel) * decayProgress
+                    }
+                    i < attackFrames + decayFrames + sustainFrames -> envelope.sustainLevel
+                    else -> {
+                        val releaseProgress = (i - (attackFrames + decayFrames + sustainFrames)).toDouble() / releaseFrames.coerceAtLeast(1)
+                        envelope.sustainLevel * (1.0 - releaseProgress).coerceAtLeast(0.0)
+                    }
+                }
+            }
+
+            val pcmVal = (sampleVal * envGain * maxAmp).toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
             for (c in 0 until channels) {
                 samples[i * channels + c] = pcmVal
             }
