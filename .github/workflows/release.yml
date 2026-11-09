@@ -74,7 +74,7 @@ jobs:
 
           if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG_NAME" ]; then
             COMMITS_SUMMARY=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" 2>/dev/null || echo "")
-            RELEASE_TITLE="Release v${VERSION_NAME} (since ${PREV_TAG})"
+            RELEASE_TITLE="Release v${VERSION_NAME}"
           else
             COMMITS_SUMMARY=""
             RELEASE_TITLE="Release v${VERSION_NAME}"
