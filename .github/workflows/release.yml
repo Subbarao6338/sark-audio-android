@@ -52,49 +52,52 @@ jobs:
       - name: Determine Dynamic Version and Release Notes
         id: release_meta
         run: |
-          BUILD_DATE=$(date -u +"%Y.%m.%d")
-          TAG_NAME="${{ github.ref_name }}"
-          if [ -z "$TAG_NAME" ] || [ "${{ github.ref_type }}" != "tag" ]; then
-            TAG_NAME="v${BUILD_DATE}"
-          fi
+          VERSION_CODE="${GITHUB_RUN_NUMBER:-1}"
+          MAJOR=0
+          MINOR=$(( VERSION_CODE / 10 ))
+          PATCH=$(( VERSION_CODE % 10 ))
+          VERSION_NAME="${MAJOR}.${MINOR}.${PATCH}"
+          TAG_NAME="v${VERSION_NAME}"
 
           # Find previous tag (if any) before current HEAD
           PREV_TAG=$(git describe --tags --abbrev=0 "${TAG_NAME}^" 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || echo "")
 
           if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG_NAME" ]; then
             COMMITS_SUMMARY=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" 2>/dev/null || echo "")
-            RELEASE_TITLE="Release ${BUILD_DATE} (since ${PREV_TAG})"
+            RELEASE_TITLE="Release v${VERSION_NAME} (since ${PREV_TAG})"
           else
             COMMITS_SUMMARY=""
-            RELEASE_TITLE="Release ${BUILD_DATE}"
+            RELEASE_TITLE="Release v${VERSION_NAME}"
           fi
 
           if [ -z "$COMMITS_SUMMARY" ]; then
-            COMMITS_SUMMARY=$(git log -n 5 --pretty=format:"- %s (%h)" 2>/dev/null || echo "- Automated release build (${BUILD_DATE})")
+            COMMITS_SUMMARY=$(git log -n 5 --pretty=format:"- %s (%h)" 2>/dev/null || echo "- Automated release build (v${VERSION_NAME})")
           fi
 
-          echo "version_name=${BUILD_DATE}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
           echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
           echo "release_title=${RELEASE_TITLE}" >> "$GITHUB_OUTPUT"
 
           # Write dynamic release notes to temporary markdown file for gh release
           {
-            echo "### Sark Audio Release"
+            echo "### Sark Audio Release v${VERSION_NAME}"
             echo ""
             echo "#### What's Changed"
             echo "$COMMITS_SUMMARY"
             echo ""
             echo "#### Build Specifications"
+            echo "- **Version**: \`v${VERSION_NAME}\` (Code \`${VERSION_CODE}\`)"
             echo "- **Architecture**: \`arm64-v8a\` strictly filtered native libraries."
             echo "- **Minification**: Aggressive R8/ProGuard dead code removal and resource shrinking enabled."
             echo "- **Design System**: Material 3 Expressive theme with dynamic color tokens."
             echo ""
             echo "#### Downloads"
-            echo "- \`sark-audio-v${BUILD_DATE}-arm64.apk\`"
+            echo "- \`sark-audio-v${VERSION_NAME}-arm64.apk\`"
           } > release_body.md
 
       - name: Build Single arm64-v8a Release APK
-        run: ./gradlew assembleRelease -x lint -x testDebugUnitTest --no-daemon
+        run: ./gradlew assembleRelease -PversionCode=${{ steps.release_meta.outputs.version_code }} -PversionName=${{ steps.release_meta.outputs.version_name }} -x lint -x testDebugUnitTest --no-daemon
 
       - name: Prepare Release Artifacts
         id: prepare_apk

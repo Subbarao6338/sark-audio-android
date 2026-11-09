@@ -8,11 +8,19 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val buildDate = Date()
-// Version Name Format: Dynamic date-based versioning formatted as YYYY.MM.DD (e.g., 2026.11.05)
-val appVersionName: String = SimpleDateFormat("yyyy.MM.dd", Locale.US).format(buildDate)
-// Version Code: Standardized integer calculated from date components (e.g., YYYYMMDDHH)
-val appVersionCode: Int = SimpleDateFormat("yyyyMMddHH", Locale.US).format(buildDate).toInt()
+// Dynamic Build & Versioning Strategy
+// Supports CI GITHUB_RUN_NUMBER / property injection or falls back locally
+val rawVersionCode = project.findProperty("versionCode")?.toString()?.toIntOrNull()
+    ?: System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+    ?: 1
+val appVersionCode: Int = rawVersionCode
+
+val major = 0
+val minor = appVersionCode / 10
+val patch = appVersionCode % 10
+val computedVersionName = "$major.$minor.$patch"
+
+val appVersionName: String = project.findProperty("versionName")?.toString() ?: computedVersionName
 
 fun ensureKeystoreExists(targetKeystore: File, storePass: String, keyPass: String, alias: String) {
     if (!targetKeystore.exists()) {
