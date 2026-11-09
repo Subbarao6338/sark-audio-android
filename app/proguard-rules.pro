@@ -1,6 +1,6 @@
 # Sark Audio Aggressive Proguard / R8 Optimization Rules
 
-# Enable aggressive code optimizations
+# Enable aggressive code optimizations and maximum shrinking
 -optimizationpasses 5
 -allowaccessmodification
 -repackageclasses ''
@@ -23,7 +23,9 @@
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
     public static int d(...);
+    public static int i(...);
 }
 
-# Standard suppressions
+# Suppress R8 Kotlin metadata version discrepancy warnings and standard suppressions
+-dontwarn kotlin.Metadata
 -dontwarn **

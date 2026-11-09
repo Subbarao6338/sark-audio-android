@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MergeType
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -37,7 +38,7 @@ fun AudioDashboardScreen(
     val tools = listOf(
         ToolboxTool("recorder", "Audio Recorder", "Studio grade PCM audio capture with real-time spectrum", Icons.Default.Mic, AccentCoral),
         ToolboxTool("trimmer", "Audio Cutter / Trimmer", "Sample accurate boundary trimming and split cutting", Icons.Default.ContentCut, PrimaryIndigoLight),
-        ToolboxTool("merger", "Audio Merger & Joiner", "Multi-clip sequencer with crossfade blending", Icons.Default.MergeType, AccentTeal),
+        ToolboxTool("merger", "Audio Merger & Joiner", "Multi-clip sequencer with crossfade blending", Icons.AutoMirrored.Filled.MergeType, AccentTeal),
         ToolboxTool("effects", "Gain Booster & Speed", "Volume amplifier, peak normalizer & tempo transformer", Icons.Default.Speed, AccentAmber),
         ToolboxTool("inspector", "Inspector & Converter", "Format details, bit depth & sample rate inspector", Icons.Default.Info, PrimaryIndigo)
     )

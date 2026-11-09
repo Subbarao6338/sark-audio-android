@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MergeType
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -78,7 +80,7 @@ fun AudioMergerScreen(
                 title = { Text("Audio Merger & Joiner") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
@@ -280,7 +282,7 @@ fun AudioMergerScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = AccentTeal),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Default.MergeType, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.MergeType, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Merge & Synthesize Audio", fontWeight = FontWeight.SemiBold)
                 }
