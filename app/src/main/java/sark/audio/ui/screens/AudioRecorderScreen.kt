@@ -68,13 +68,13 @@ fun AudioRecorderScreen(
                 title = { Text("Audio Recorder") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -87,7 +87,7 @@ fun AudioRecorderScreen(
             // Live status & timer card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -106,7 +106,7 @@ fun AudioRecorderScreen(
 
                     Text(
                         text = statusText,
-                        color = if (recorderState is AudioRecorderController.State.Recording) AccentCoral else TextSecondary,
+                        color = if (recorderState is AudioRecorderController.State.Recording) AccentCoral else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         letterSpacing = 1.2.sp
@@ -124,7 +124,7 @@ fun AudioRecorderScreen(
                         fontSize = 44.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -181,9 +181,9 @@ fun AudioRecorderScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(DarkCard)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
                     ) {
-                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -209,12 +209,12 @@ fun AudioRecorderScreen(
                         modifier = Modifier
                             .size(56.dp)
                             .clip(CircleShape)
-                            .background(DarkCard)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
                     ) {
                         Icon(
                             imageVector = if (recorderState is AudioRecorderController.State.Recording) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = "Pause/Resume",
-                            tint = TextPrimary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -263,9 +263,9 @@ fun AudioRecorderScreen(
                         modifier = Modifier
                             .size(56.dp)
                             .clip(CircleShape)
-                            .background(DarkCard)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "New Recording", tint = TextPrimary)
+                        Icon(Icons.Default.Refresh, contentDescription = "New Recording", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }

@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import sark.audio.data.SettingsRepository
 import sark.audio.ui.screens.*
 import sark.audio.ui.theme.SarkAudioTheme
 
@@ -26,10 +27,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val settingsRepository = SettingsRepository(applicationContext)
         checkAndRequestPermissions()
 
         setContent {
-            SarkAudioTheme {
+            val appSettings by settingsRepository.settings.collectAsState()
+
+            SarkAudioTheme(
+                themeMode = appSettings.themeMode,
+                natureTheme = appSettings.natureTheme,
+                dynamicColor = appSettings.dynamicColor
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -38,7 +46,15 @@ class MainActivity : ComponentActivity() {
 
                     when (currentScreen) {
                         "dashboard" -> AudioDashboardScreen(
-                            onNavigateToTool = { toolId -> currentScreen = toolId }
+                            settings = appSettings,
+                            settingsRepository = settingsRepository,
+                            onNavigateToTool = { toolId -> currentScreen = toolId },
+                            onNavigateToSettings = { currentScreen = "settings" }
+                        )
+                        "settings" -> SettingsScreen(
+                            settings = appSettings,
+                            settingsRepository = settingsRepository,
+                            onBack = { currentScreen = "dashboard" }
                         )
                         "creator", "dtmf_creator", "silence_creator" -> AudioCreatorScreen(
                             onBack = { currentScreen = "dashboard" }
@@ -80,7 +96,10 @@ class MainActivity : ComponentActivity() {
                             onBack = { currentScreen = "dashboard" }
                         )
                         else -> AudioDashboardScreen(
-                            onNavigateToTool = { toolId -> currentScreen = toolId }
+                            settings = appSettings,
+                            settingsRepository = settingsRepository,
+                            onNavigateToTool = { toolId -> currentScreen = toolId },
+                            onNavigateToSettings = { currentScreen = "settings" }
                         )
                     }
                 }

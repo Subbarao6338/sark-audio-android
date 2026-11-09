@@ -78,13 +78,13 @@ fun AudioEffectsScreen(
                 title = { Text("Gain Booster & Effects") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -96,7 +96,7 @@ fun AudioEffectsScreen(
             Column {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -108,7 +108,7 @@ fun AudioEffectsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("AUDIO MONITOR", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text("AUDIO MONITOR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                             Text("${processedAudio.header.durationMs} ms", color = AccentAmber, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
 
@@ -129,7 +129,7 @@ fun AudioEffectsScreen(
                 // Control Sliders
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -138,7 +138,7 @@ fun AudioEffectsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Volume Gain Booster", style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
+                            Text("Volume Gain Booster", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                             Text("${(volumeMultiplier * 100).toInt()}%", color = PrimaryIndigoLight, fontWeight = FontWeight.Bold)
                         }
                         Slider(
@@ -154,7 +154,7 @@ fun AudioEffectsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Speed / Tempo", style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
+                            Text("Speed / Tempo", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                             Text("%.2fx".format(speedMultiplier), color = AccentAmber, fontWeight = FontWeight.Bold)
                         }
                         Slider(
@@ -240,9 +240,9 @@ fun AudioEffectsScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(DarkCard)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
                     ) {
-                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
 

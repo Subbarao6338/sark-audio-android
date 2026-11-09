@@ -53,13 +53,13 @@ fun AudioInspectorScreen(
                 title = { Text("Audio Inspector & Converter") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -72,11 +72,11 @@ fun AudioInspectorScreen(
             // Audio File Information Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("FILE SPECIFICATIONS", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("FILE SPECIFICATIONS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(14.dp))
 
                     MetadataRow(icon = Icons.Default.AudioFile, label = "File Name", value = metadata.fileName)
@@ -93,14 +93,14 @@ fun AudioInspectorScreen(
             // Audio Converter Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("FORMAT & SPEC CONVERTER", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("FORMAT & SPEC CONVERTER", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Text("Target Sample Rate", color = TextPrimary, fontSize = 14.sp)
+                    Text("Target Sample Rate", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -117,7 +117,7 @@ fun AudioInspectorScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Target Channels", color = TextPrimary, fontSize = 14.sp)
+                    Text("Target Channels", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -191,10 +191,10 @@ fun MetadataRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(18.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(10.dp))
-            Text(label, color = TextSecondary, fontSize = 14.sp)
+            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
         }
-        Text(value, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+        Text(value, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
     }
 }

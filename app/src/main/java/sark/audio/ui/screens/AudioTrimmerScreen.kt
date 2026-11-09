@@ -84,13 +84,13 @@ fun AudioTrimmerScreen(
                 title = { Text("Audio Cutter & Trimmer") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -102,7 +102,7 @@ fun AudioTrimmerScreen(
             Column {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -114,7 +114,7 @@ fun AudioTrimmerScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("WAVEFORM TRIM VIEW", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text("WAVEFORM TRIM VIEW", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                             Text(
                                 "Selected: ${((endCutMs - startCutMs) / 1000.0).coerceAtLeast(0.0)}s",
                                 color = AccentCoral,
@@ -143,13 +143,13 @@ fun AudioTrimmerScreen(
                         ) {
                             Text(
                                 "00:00",
-                                color = TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 12.sp
                             )
                             Text(
                                 "%02d:%02d".format((totalMs / 1000) / 60, (totalMs / 1000) % 60),
-                                color = TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 12.sp
                             )
@@ -162,7 +162,7 @@ fun AudioTrimmerScreen(
                 // Boundary Controls
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -170,13 +170,13 @@ fun AudioTrimmerScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("CUT BOUNDARIES", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                        Text("CUT BOUNDARIES", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Start Marker Slider
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Start: ${startCutMs}ms", color = TextPrimary, fontSize = 13.sp, modifier = Modifier.width(90.dp))
+                            Text("Start: ${startCutMs}ms", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, modifier = Modifier.width(90.dp))
                             Slider(
                                 value = startCutMs.toFloat(),
                                 onValueChange = {
@@ -189,7 +189,7 @@ fun AudioTrimmerScreen(
 
                         // End Marker Slider
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("End: ${endCutMs}ms", color = TextPrimary, fontSize = 13.sp, modifier = Modifier.width(90.dp))
+                            Text("End: ${endCutMs}ms", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, modifier = Modifier.width(90.dp))
                             Slider(
                                 value = endCutMs.toFloat(),
                                 onValueChange = {
@@ -250,9 +250,9 @@ fun AudioTrimmerScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(DarkCard)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
                     ) {
-                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                        Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
 

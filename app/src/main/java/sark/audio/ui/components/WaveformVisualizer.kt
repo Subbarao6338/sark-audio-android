@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -13,14 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import sark.audio.ui.theme.AccentCoral
-import sark.audio.ui.theme.PrimaryIndigo
-import sark.audio.ui.theme.WaveformActive
-import sark.audio.ui.theme.WaveformInactive
 import kotlin.math.max
 
 /**
  * Interactive audio waveform visualizer supporting scrub seeking,
  * playback head tracking, and trimming boundary markers.
+ * Dynamic theming adapts cleanly across Light and Nature theme modes.
  */
 @Composable
 fun WaveformVisualizer(
@@ -31,9 +30,10 @@ fun WaveformVisualizer(
     modifier: Modifier = Modifier
         .fillMaxWidth()
         .height(140.dp),
-    barColor: Color = WaveformInactive,
-    activeBarColor: Color = WaveformActive,
+    barColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+    activeBarColor: Color = MaterialTheme.colorScheme.primary,
     markerColor: Color = AccentCoral,
+    playheadColor: Color = MaterialTheme.colorScheme.onSurface,
     onSeek: ((Float) -> Unit)? = null
 ) {
     Canvas(
@@ -139,7 +139,7 @@ fun WaveformVisualizer(
         // Draw Playhead
         val playheadX = (playbackProgress * width).coerceIn(0f, width)
         drawLine(
-            color = Color.White,
+            color = playheadColor,
             start = Offset(playheadX, 0f),
             end = Offset(playheadX, height),
             strokeWidth = 2.5.dp.toPx()

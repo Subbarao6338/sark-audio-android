@@ -76,13 +76,13 @@ fun AudioMixerScreen(
                 title = { Text("Multi-Track Mixer & Remix") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -95,11 +95,11 @@ fun AudioMixerScreen(
             // Monitor Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("MASTER SUM MONITOR", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("MASTER SUM MONITOR", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(14.dp))
                     WaveformVisualizer(
                         amplitudes = waveformAmplitudes,
@@ -132,9 +132,9 @@ fun AudioMixerScreen(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(DarkBackground)
+                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = TextPrimary)
+                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -143,21 +143,21 @@ fun AudioMixerScreen(
             // Track Faders Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("MULTI-TRACK FADERS & OFFSETS", style = MaterialTheme.typography.labelSmall, color = AccentAmber, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text("Track 1 (Lead Synth): ${(track1Volume * 100).toInt()}%", color = TextPrimary, fontSize = 13.sp)
+                    Text("Track 1 (Lead Synth): ${(track1Volume * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = track1Volume, onValueChange = { track1Volume = it }, valueRange = 0f..1.5f)
 
-                    Text("Track 2 (Harmony): ${(track2Volume * 100).toInt()}% • Offset: ${track2DelayMs.toInt()}ms", color = TextPrimary, fontSize = 13.sp)
+                    Text("Track 2 (Harmony): ${(track2Volume * 100).toInt()}% • Offset: ${track2DelayMs.toInt()}ms", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = track2Volume, onValueChange = { track2Volume = it }, valueRange = 0f..1.5f)
                     Slider(value = track2DelayMs, onValueChange = { track2DelayMs = it }, valueRange = 0f..1000f)
 
-                    Text("Track 3 (Bass & Risers): ${(track3Volume * 100).toInt()}%", color = TextPrimary, fontSize = 13.sp)
+                    Text("Track 3 (Bass & Risers): ${(track3Volume * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(value = track3Volume, onValueChange = { track3Volume = it }, valueRange = 0f..1.5f)
 
                     Spacer(modifier = Modifier.height(12.dp))

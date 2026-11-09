@@ -54,13 +54,13 @@ fun AudioAnalyzerScreen(
                 title = { Text("Spectrum Analyzer & Tuner") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface, titleContentColor = TextPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -73,7 +73,7 @@ fun AudioAnalyzerScreen(
             // Tuner Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -82,7 +82,7 @@ fun AudioAnalyzerScreen(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("CHROMATIC INSTRUMENT TUNER", style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CHROMATIC INSTRUMENT TUNER", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
@@ -95,7 +95,7 @@ fun AudioAnalyzerScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Detected: ${"%.1f".format(tunerResult.detectedHz)} Hz • Target: ${"%.1f".format(tunerResult.targetHz)} Hz",
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
 
@@ -112,13 +112,13 @@ fun AudioAnalyzerScreen(
             // FFT Spectrum Graph
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("COOLEY-TUKEY FFT SPECTRUM", style = MaterialTheme.typography.labelSmall, color = PrimaryIndigoLight, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text("Peak Frequency: ${spectrumResult.peakFrequencyHz.toInt()} Hz • RMS: ${"%.1f".format(spectrumResult.rmsDb)} dBFS", color = TextSecondary, fontSize = 12.sp)
+                    Text("Peak Frequency: ${spectrumResult.peakFrequencyHz.toInt()} Hz • RMS: ${"%.1f".format(spectrumResult.rmsDb)} dBFS", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -151,13 +151,13 @@ fun AudioAnalyzerScreen(
             // Test Tone Generator Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("INJECT TEST SIGNAL", style = MaterialTheme.typography.labelSmall, color = AccentAmber, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Signal Frequency: ${testFreq.toInt()} Hz", color = TextPrimary, fontSize = 13.sp)
+                    Text("Signal Frequency: ${testFreq.toInt()} Hz", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     Slider(
                         value = testFreq,
                         onValueChange = { testFreq = it },
